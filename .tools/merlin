@@ -1,0 +1,23 @@
+FLG -rectypes
+
+B COQLIB/config
+B COQLIB/lib
+B COQLIB/intf
+B COQLIB/kernel
+B COQLIB/kernel/byterun
+B COQLIB/library
+B COQLIB/engine
+B COQLIB/pretyping
+B COQLIB/interp
+B COQLIB/proofs
+B COQLIB/tactics
+B COQLIB/printing
+B COQLIB/parsing
+B COQLIB/toplevel
+
+B COQLIB/tools
+B COQLIB/tools/coqdoc
+B COQLIB/dev
+
+B ./src
+S ./src

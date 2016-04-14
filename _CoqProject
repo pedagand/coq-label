@@ -1,0 +1,6 @@
+-I src
+-Q theories LOGICAL_PATH_TO_PLUGIN
+
+./src/name_plugin.ml4
+
+./theories/Plugin.v

@@ -11,7 +11,7 @@ Lemma test1:
     is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
 Proof.
   intros t e1 e2 e3 **.
-  exact \< is_foo e1 t \>.
+  exact (\< is_foo e1 t \>).
 Qed.
 
 Lemma test2: 
@@ -19,8 +19,8 @@ Lemma test2:
     is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
 Proof.
   intros t e1 e2 **.
-  exact \< is_foo e1 _ \>.
-Defined.
+  exact (\< is_foo e1 _ \>).
+Qed.
 
 Print test2.
 
@@ -29,7 +29,7 @@ Lemma test3:
     is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
 Proof.
   intros t e1 e2 e3 **. 
-  Fail exact \< is_foo e2 t \>. 
+  Fail exact (\< is_foo e2 t \>).
 Abort.
 
 Lemma test4: 
@@ -37,12 +37,12 @@ Lemma test4:
     is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
 Proof.
   intros t e1 e2 e3 **. 
-  Fail exact \< is_foo e3 t \>. 
+  Fail exact (\< is_foo e3 t \>).
 Abort.
 
 Lemma test5: 
   forall n, Vec n -> Vec n -> Vec n.
 Proof.
   intros n **.
-  Fail exact \< Vec _ \>. 
+  Fail exact (\< Vec _ \>).
 Abort.

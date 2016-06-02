@@ -70,9 +70,9 @@ END;;
 (* Extend grammar with cartouches. *)
 
 GEXTEND Gram
-  GLOBAL: constr ;
+  GLOBAL: operconstr ;
 
-  constr:
+  operconstr:
     [ "200" [ "\\<"; p = cartouche_patt; "\\>" -> 
       let cartouche_entry = 
         { Tacexpr.mltac_index = 0 ;

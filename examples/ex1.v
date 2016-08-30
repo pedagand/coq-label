@@ -23,37 +23,48 @@ Section Spivak.
   Hypothesis f_derivable : derivable f.
   Variables Imin Imax : R.
 
-  Definition f' := fun x => derive_pt f x (f_derivable x).
+  Notation "'D[' f ']' x" := 
+    (derive_pt f x%R (f_derivable x%R)) 
+      (at level 10, x at next level).
 
-  Corollary spivak (H : forall x : R, Imin <= x <= Imax -> f' x > 0) :
+  Corollary spivak (H : forall x : R, Imin <= x <= Imax -> D[ f ] x > 0) :
     f strictly increasing on [Imin, Imax].
   Proof.
     intros a b **.
 
-    assert (exists x : R, f b - f a = f' x * (b - a) /\ a < x < b)
-      as (x & ? & ? & ?)
-        by exact (MVT_cor1 _ _ _ f_derivable (\< a < b \>)).
-    
-    assert (forall x : R, a <= x <= b -> f' x > 0). {
-      clear dependent x; intros x (? & ?).
-      assert (Imin <= x <= Imax) by (split; eapply Rle_trans; eassumption).
-      exact (H _ (\< _ <= x <= _ \>)).
-    }
-    clear H.
+    assert (exists x : R, f b - f a = D[ f ] x * (b - a) /\ a < x < b)
+      by auto using MVT_cor1, (\< a < b \>) .
+    decompose record (\< exists _, _ = _ /\ _ < _ < _\>) .
 
-    assert (f b - f a > 0). {
-      enough (f' x * (b - a) > 0) by (now rewrite (\< f b - f a = _ \>)).
+    assert (forall x : R, a <= x <= b -> D[ f ] x > 0).
+    {
+      clear dependent x; intros x [? ?].
+      assert (Imin <= x <= Imax) 
+        by eauto using Rle_trans, (\< a <= x \>) , (\< x <= b \>) .
+      auto using (\< forall x, _ -> D[ f ] x > 0 \>) , (\< Imin <= x <= Imax \>) .
+    }
+
+    assert (f b - f a > 0).
+    {
+      enough (D[ f ] x * (b - a) > 0) 
+        by now rewrite (\< f b - f a = _ \>) .
       
-      assert (f' x > 0). {
-        assert (a <= x <= b) by (split; apply Rlt_le; assumption).
-        exact ((\< forall _ _, f' _ > 0 \>) _ (\< _ <= x <= _ \>)).
+      assert (D[ f ] x > 0).
+      {
+        assert (a <= x <= b)
+          by auto using Rlt_le, (\< forall _ , _ -> D[ f ] _ > 0 \>) .
+        auto using (\< forall _ _, D[ f ] _ > 0 \>) , (\< _ <= x <= _ \>) .
       }
 
-      assert (b - a > 0) by exact (Rgt_minus _ _ (\< a < b \>)).
-      exact (Rmult_gt_0_compat _ _ (\< f' x > 0 \>) (\< b - a > 0 \>)).
+      assert (b - a > 0)
+        by auto using Rgt_minus, (\< a < b \>) .
+
+      auto using Rmult_gt_0_compat, 
+                 (\< D[ f ] x > 0 \>) , 
+                 (\< b - a > 0 \>) .
     }
 
-    exact (Rminus_gt _ _ (\< _ > 0 \>) : f a < f b).
+    apply Rminus_gt; auto using (\< f b - f a > 0 \>) .
   Qed.
 
 End Spivak.

@@ -52,35 +52,34 @@ ARGUMENT EXTEND cartouche_patt
  [ lconstr(c) ] ->  [ c ]
 END
 
+(* Manually register [cartouche] as an ML tactic *)
+
+let cortouche_name = { Tacexpr.mltac_tactic = "cartouche";
+                       Tacexpr.mltac_plugin = "cortouche_plugin" }
+
+let cortouche_entry = { Tacexpr.mltac_index = 0;
+                        Tacexpr.mltac_name = cortouche_name }
+
+let _ =
+  let f = fun [c] _ -> 
+    cartouche (Tacinterp.Value.cast (Genarg.topwit wit_cartouche_patt) c)
+  in
+  Tacenv.register_ml_tactic cortouche_name [| f |]
+
+(* Extend grammar with cartouches. *)
+
 module Gram = Pcoq.Gram
 open Pcoq.Constr
 open Constrexpr
 open Compat
-
-(*
-  XXX: We don't actually use this syntax, we just take advantage of
-       [TACTIC EXTEND] to inject the ML tactic in the system. 
-  TODO: Look into [Ltac.Tacenv] to manually register [cartouche]
-*)
-TACTIC EXTEND cartouche
-[ "of" cartouche_patt(c) ] ->  [ cartouche c ]
-END;;
-
-(* Extend grammar with cartouches. *)
 
 GEXTEND Gram
   GLOBAL: operconstr ;
 
   operconstr:
     [ "200" [ "\\<"; p = cartouche_patt; "\\>" -> 
-      let cartouche_entry = 
-        { Tacexpr.mltac_index = 0 ;
-          Tacexpr.mltac_name = 
-            { Tacexpr.mltac_tactic = "cartouche";
-              Tacexpr.mltac_plugin = "cortouche_plugin" } }
-      in
       let argp = Genarg.in_gen (Genarg.rawwit wit_cartouche_patt) p in
-      let tac = Tacexpr.TacML (!@loc, cartouche_entry, [Tacexpr.TacGeneric argp]) in
+      let tac = Tacexpr.TacML (!@loc, cortouche_entry, [Tacexpr.TacGeneric argp]) in
       let arg = Genarg.in_gen (Genarg.rawwit Constrarg.wit_tactic) tac in
       CHole (!@loc, None, IntroAnonymous, Some arg) ]]
     ;

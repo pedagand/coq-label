@@ -9,25 +9,24 @@ open Proofview.Notations
 
 DECLARE PLUGIN "cortouche_plugin"
 
-(* Search for the pattern [c] in the context. *)
-let cartouche c =
+(* Search for the pattern [patt] in the context. *)
+let cartouche patt =
   Proofview.Goal.nf_enter { Proofview.Goal.enter = begin fun gl ->
     let hyps = Proofview.Goal.hyps gl in
     let sigma = Tacmach.New.project gl in
     let env = Proofview.Goal.env gl in
-      (Pp.string_of_ppcmds (Printer.pr_constr_pattern_env env sigma c));
     try
-      let wit = List.find (fun hyp -> 
+      let is_matching_patt hyp =         
         let typ = Context.Named.Declaration.get_type hyp in
-        Constr_matching.is_matching_conv env sigma c typ)
-        hyps
+        Constr_matching.is_matching_conv env sigma patt typ
       in
+      let wit = List.find is_matching_patt hyps in
       let (_,sort) = Typing.type_of env sigma (Context.Named.Declaration.get_type wit) in
       if Term.is_Prop sort then
         Refine.refine ~unsafe:false { Sigma.run = fun h -> 
           Sigma.here (Constr.mkVar (Context.Named.Declaration.get_id wit)) h }
       else
-        Tacticals.New.tclZEROMSG (str "Proof-relevant assumption.")
+        Tacticals.New.tclZEROMSG (str "Found a proof-relevant assumption: abort.")
     with
     | _ ->
        Tacticals.New.tclZEROMSG (str "No such assumption.")

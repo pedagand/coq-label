@@ -10,14 +10,19 @@ open Proofview.Notations
 DECLARE PLUGIN "cortouche_plugin"
 
 (* Search for the pattern [patt] in the context. *)
-let cartouche patt =
+let cartouche ?(concl=false) patt =
   Proofview.Goal.nf_enter { Proofview.Goal.enter = begin fun gl ->
     let hyps = Proofview.Goal.hyps gl in
     let sigma = Tacmach.New.project gl in
     let env = Proofview.Goal.env gl in
     try
-      let is_matching_patt hyp =         
+      let is_matching_patt hyp =
         let typ = Context.Named.Declaration.get_type hyp in
+        let typ = if not concl then typ 
+                  else snd (Term.decompose_prod_assum typ) in
+        Printf.ifprintf stderr "Checking pattern %s against conclusion %s\n"
+                      (Pp.string_of_ppcmds (Printer.pr_constr_pattern_env env sigma patt))
+                      (Pp.string_of_ppcmds (Printer.pr_constr_env env sigma typ));
         Constr_matching.is_matching_conv env sigma patt typ
       in
       let wit = List.find is_matching_patt hyps in
@@ -54,17 +59,22 @@ END
 
 (* Manually register [cartouche] as an ML tactic *)
 
-let cortouche_name = { Tacexpr.mltac_tactic = "cartouche";
-                       Tacexpr.mltac_plugin = "cortouche_plugin" }
+let cortouche_name concl = 
+  let suff = if concl then "std" else "concl" in
+  { Tacexpr.mltac_tactic = Printf.sprintf "cartouche_%s" suff ;
+    Tacexpr.mltac_plugin = "cortouche_plugin" }
 
-let cortouche_entry = { Tacexpr.mltac_index = 0;
-                        Tacexpr.mltac_name = cortouche_name }
+let cortouche_entry concl =
+  { Tacexpr.mltac_index = 0;
+    Tacexpr.mltac_name = cortouche_name concl }
 
 let _ =
-  let f = fun [c] _ -> 
-    cartouche (Tacinterp.Value.cast (Genarg.topwit wit_cartouche_patt) c)
+  let cartouche concl = fun [c] _ -> 
+    cartouche ~concl:concl (Tacinterp.Value.cast (Genarg.topwit wit_cartouche_patt) c)
   in
-  Tacenv.register_ml_tactic cortouche_name [| f |]
+  Tacenv.register_ml_tactic (cortouche_name true) [| cartouche true |];
+  Tacenv.register_ml_tactic (cortouche_name false) [| cartouche false |]
+
 
 (* Extend grammar with cartouches. *)
 
@@ -73,14 +83,17 @@ open Pcoq.Constr
 open Constrexpr
 open Compat
 
+let register loc concl p =
+  let argp = Genarg.in_gen (Genarg.rawwit wit_cartouche_patt) p in
+  let tac = Tacexpr.TacML (loc, cortouche_entry concl, [Tacexpr.TacGeneric argp]) in
+  let arg = Genarg.in_gen (Genarg.rawwit Constrarg.wit_tactic) tac in
+  CHole (loc, None, IntroAnonymous, Some arg) 
+
 GEXTEND Gram
   GLOBAL: operconstr ;
 
   operconstr:
-    [ "200" [ "\\<"; p = cartouche_patt; "\\>" -> 
-      let argp = Genarg.in_gen (Genarg.rawwit wit_cartouche_patt) p in
-      let tac = Tacexpr.TacML (!@loc, cortouche_entry, [Tacexpr.TacGeneric argp]) in
-      let arg = Genarg.in_gen (Genarg.rawwit Constrarg.wit_tactic) tac in
-      CHole (!@loc, None, IntroAnonymous, Some arg) ]]
+    [ "200" [ "\\<"; p = cartouche_patt; "\\>" -> register !@loc false p
+            | "\\<<"; p = cartouche_patt; "\\>>" -> register !@loc true p ]]
     ;
 END;;

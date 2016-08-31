@@ -30,6 +30,7 @@ Lemma test3:
 Proof.
   intros t e1 e2 e3 **. 
   Fail exact (\< is_foo e2 t \>).
+  (* because this is the right hypothesis *)
 Abort.
 
 Lemma test4: 
@@ -38,6 +39,7 @@ Lemma test4:
 Proof.
   intros t e1 e2 e3 **. 
   Fail exact (\< is_foo e3 t \>).
+  (* because there is no such assumption *)
 Abort.
 
 Lemma test5: 
@@ -45,4 +47,23 @@ Lemma test5:
 Proof.
   intros n **.
   Fail exact (\< Vec _ \>).
+  (* because [Vec] is proof-relevant *)
+Abort.
+
+Lemma test6: 
+  (forall e t, is_foo e t) -> forall e t, is_foo e t.
+Proof.
+  intro H.
+  Fail exact (\< is_foo _ _ \>). 
+  (* because [is_foo] is hidden under some [forall]s *)
+
+  exact (\<< is_foo _ _ \>>).
+Qed.
+
+Lemma test7:
+  (forall e t, is_foo e t) -> forall e t, is_foo e t.
+Proof.
+  intro H.
+  Fail exact (\<< forall t, is_foo _ t \>>).
+  (* because of a limitation: we do not search for partially applied hypothesis *)
 Abort.

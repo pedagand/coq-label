@@ -41,7 +41,7 @@ Section Spivak.
       clear dependent x; intros x [? ?].
       assert (Imin <= x <= Imax) 
         by eauto using Rle_trans, (\< a <= x \>) , (\< x <= b \>) .
-      auto using (\< forall x, _ -> D[ f ] x > 0 \>) , (\< Imin <= x <= Imax \>) .
+      auto using (\<< D[ f ] _ > 0 \>>) , (\< Imin <= x <= Imax \>) .
     }
 
     assert (f b - f a > 0).
@@ -52,8 +52,8 @@ Section Spivak.
       assert (D[ f ] x > 0).
       {
         assert (a <= x <= b)
-          by auto using Rlt_le, (\< forall _ , _ -> D[ f ] _ > 0 \>) .
-        auto using (\< forall _ _, D[ f ] _ > 0 \>) , (\< _ <= x <= _ \>) .
+          by auto using Rlt_le, (\<< D[ f ] _ > 0 \>>) .
+        auto using (\<< D[ f ] _ > 0 \>>) , (\< _ <= x <= _ \>) .
       }
 
       assert (b - a > 0)
@@ -70,5 +70,5 @@ Section Spivak.
 End Spivak.
 
 (* Local Variables: *)
-(* company-coq-local-symbols: (("(\\<" . ?⟨) ("\\>)" . ?⟩)) *)
+(* company-coq-local-symbols: (("(\\<" . ?⟨) ("\\>)" . ?⟩) ("(\\<<" . ?≪) ("\\>>)" . ?≫)) *)
 (* End: *)

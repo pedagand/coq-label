@@ -34,7 +34,7 @@ Section Spivak.
 
     assert (exists x : R, f b - f a = D[ f ] x * (b - a) /\ a < x < b) 
       as [x [? [? ?]]]
-      by auto using MVT_cor1, (\< a < b \>) .
+        by apply MVT_cor1, (\< a < b \>) .
 
     assert (forall x : R, a <= x <= b -> D[ f ] x > 0).
     {
@@ -42,7 +42,7 @@ Section Spivak.
       assert (Imin <= x <= Imax) 
         by eauto using Rle_trans, (\< a <= x \>) , (\< x <= b \>) .
 
-      now auto using (\<< D[ f ] _ > 0 \>>) , (\< Imin <= x <= Imax \>) .
+      now apply (\<< D[ f ] _ > 0 \>>) , (\< Imin <= x <= Imax \>) .
     }
 
     assert (f b - f a > 0).
@@ -55,18 +55,18 @@ Section Spivak.
         assert (a <= x <= b)
           by auto using Rlt_le, (\<< D[ f ] _ > 0 \>>) .
         
-        now auto using (\<< D[ f ] _ > 0 \>>) , (\< _ <= x <= _ \>) .
+        now apply (\<< D[ f ] _ > 0 \>>) , (\< _ <= x <= _ \>) .
       }
 
       assert (b - a > 0)
-        by auto using Rgt_minus, (\< a < b \>) .
+        by apply Rgt_minus, (\< a < b \>) .
 
       now auto using Rmult_gt_0_compat, 
                      (\< D[ f ] x > 0 \>) , 
                      (\< b - a > 0 \>) .
     }
 
-    now apply Rminus_gt; auto using (\< f b - f a > 0 \>) .
+    now apply Rminus_gt , (\< f b - f a > 0 \>) .
   Qed.
 
 End Spivak.

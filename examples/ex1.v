@@ -32,16 +32,17 @@ Section Spivak.
   Proof.
     intros a b **.
 
-    assert (exists x : R, f b - f a = D[ f ] x * (b - a) /\ a < x < b)
+    assert (exists x : R, f b - f a = D[ f ] x * (b - a) /\ a < x < b) 
+      as [x [? [? ?]]]
       by auto using MVT_cor1, (\< a < b \>) .
-    decompose record (\< exists _, _ = _ /\ _ < _ < _\>) .
 
     assert (forall x : R, a <= x <= b -> D[ f ] x > 0).
     {
       clear dependent x; intros x [? ?].
       assert (Imin <= x <= Imax) 
         by eauto using Rle_trans, (\< a <= x \>) , (\< x <= b \>) .
-      auto using (\<< D[ f ] _ > 0 \>>) , (\< Imin <= x <= Imax \>) .
+
+      now auto using (\<< D[ f ] _ > 0 \>>) , (\< Imin <= x <= Imax \>) .
     }
 
     assert (f b - f a > 0).
@@ -53,18 +54,19 @@ Section Spivak.
       {
         assert (a <= x <= b)
           by auto using Rlt_le, (\<< D[ f ] _ > 0 \>>) .
-        auto using (\<< D[ f ] _ > 0 \>>) , (\< _ <= x <= _ \>) .
+        
+        now auto using (\<< D[ f ] _ > 0 \>>) , (\< _ <= x <= _ \>) .
       }
 
       assert (b - a > 0)
         by auto using Rgt_minus, (\< a < b \>) .
 
-      auto using Rmult_gt_0_compat, 
-                 (\< D[ f ] x > 0 \>) , 
-                 (\< b - a > 0 \>) .
+      now auto using Rmult_gt_0_compat, 
+                     (\< D[ f ] x > 0 \>) , 
+                     (\< b - a > 0 \>) .
     }
 
-    apply Rminus_gt; auto using (\< f b - f a > 0 \>) .
+    now apply Rminus_gt; auto using (\< f b - f a > 0 \>) .
   Qed.
 
 End Spivak.

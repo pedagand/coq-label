@@ -15,26 +15,29 @@ let cartouche ?(concl=false) patt =
     let hyps = Proofview.Goal.hyps gl in
     let sigma = Tacmach.New.project gl in
     let env = Proofview.Goal.env gl in
-    try
-      let is_matching_patt hyp =
-        let typ = Context.Named.Declaration.get_type hyp in
-        let typ = if not concl then typ 
-                  else snd (Term.decompose_prod_assum typ) in
-        Printf.ifprintf stderr "Checking pattern %s against conclusion %s\n"
+    let is_matching_patt hyp =
+      let typ = Context.Named.Declaration.get_type hyp in
+      let typ = if not concl then typ 
+                else snd (Term.decompose_prod_assum typ) in
+      Printf.ifprintf stderr "Checking pattern %s against conclusion %s\n"
                       (Pp.string_of_ppcmds (Printer.pr_constr_pattern_env env sigma patt))
                       (Pp.string_of_ppcmds (Printer.pr_constr_env env sigma typ));
-        Constr_matching.is_matching_conv env sigma patt typ
-      in
-      let wit = List.find is_matching_patt hyps in
-      let (_,sort) = Typing.type_of env sigma (Context.Named.Declaration.get_type wit) in
-      if Term.is_Prop sort then
-        Refine.refine ~unsafe:false { Sigma.run = fun h -> 
-          Sigma.here (Constr.mkVar (Context.Named.Declaration.get_id wit)) h }
-      else
-        Tacticals.New.tclZEROMSG (str "Found a proof-relevant assumption: abort.")
-    with
-    | _ ->
+      Constr_matching.is_matching_conv env sigma patt typ
+    in
+    let wit = List.find_all is_matching_patt hyps in
+    match wit with
+    | [] -> 
        Tacticals.New.tclZEROMSG (str "No such assumption.")
+    | [ wit ] ->
+       let (_,sort) = Typing.type_of env sigma (Context.Named.Declaration.get_type wit) in
+       let wit = Constr.mkVar (Context.Named.Declaration.get_id wit) in
+       let insert_wit h = Sigma.here wit h in
+       if Term.is_Prop sort then
+         Refine.refine ~unsafe:false { Sigma.run = insert_wit }
+       else
+         Tacticals.New.tclZEROMSG (str "Found a proof-relevant assumption.")
+    | _ -> 
+       Tacticals.New.tclZEROMSG (str "This pattern is ambiguous.")
   end }
 
 (* Extend tactic argument's syntax with pattern  *)

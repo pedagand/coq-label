@@ -53,9 +53,11 @@ Section Spivak.
       assert (D[ f ] x > 0).
       {
         assert (a <= x <= b)
-          by auto using Rlt_le, (\<< D[ f ] _ > 0 \>>) .
+          (* XXX: we would like the second cartouche to match without the [forall] *)
+          by auto using Rlt_le, (\< forall _ , a <= _ <= b -> D[ f ] _ > 0 \>) .
         
-        now apply (\<< D[ f ] _ > 0 \>>) , (\< _ <= x <= _ \>) .
+        (* XXX: we would like the first cartouche to match without the [forall] *)
+        now apply (\< forall _ , a <= _ <= b -> D[ f ] _ > 0 \>) , (\< _ <= x <= _ \>) .
       }
 
       assert (b - a > 0)

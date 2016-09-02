@@ -42,6 +42,17 @@ Proof.
   (* because there is no such assumption *)
 Abort.
 
+
+Lemma test41: 
+  forall t, forall e1 e2 e3 : exp, 
+    is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
+Proof.
+  intros t e1 e2 e3 **. 
+  Fail exact (\< is_foo _ _ \>).
+  (* because this pattern is ambiguous, it could match any of 
+     [is_foo e1 t] and [is_foo e2 t] *)
+Abort.
+
 Lemma test5: 
   forall n, Vec n -> Vec n -> Vec n.
 Proof.

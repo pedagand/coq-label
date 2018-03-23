@@ -5,23 +5,23 @@ open Genintern
 open Constrintern
 open Pcoq.Constr
 open Pp
-open Proofview.Notations
+open Ltac_plugin
 
 DECLARE PLUGIN "cortouche_plugin"
 
 (* Search for the pattern [patt] in the context. *)
 let cartouche ?(concl=false) patt =
-  Proofview.Goal.nf_enter { Proofview.Goal.enter = begin fun gl ->
+  Proofview.Goal.nf_enter begin fun gl ->
     let hyps = Proofview.Goal.hyps gl in
     let sigma = Tacmach.New.project gl in
     let env = Proofview.Goal.env gl in
     let is_matching_patt hyp =
       let typ = Context.Named.Declaration.get_type hyp in
       let typ = if not concl then typ 
-                else snd (Term.decompose_prod_assum typ) in
+                else snd (EConstr.decompose_prod_assum sigma typ) in
       Printf.ifprintf stderr "Checking pattern %s against conclusion %s\n"
                       (Pp.string_of_ppcmds (Printer.pr_constr_pattern_env env sigma patt))
-                      (Pp.string_of_ppcmds (Printer.pr_constr_env env sigma typ));
+                      (Pp.string_of_ppcmds (Printer.pr_econstr_env env sigma typ));
       Constr_matching.is_matching_conv env sigma patt typ
     in
     let wit = List.find_all is_matching_patt hyps in
@@ -31,21 +31,22 @@ let cartouche ?(concl=false) patt =
     | [ wit ] ->
        let (_,sort) = Typing.type_of env sigma (Context.Named.Declaration.get_type wit) in
        let wit = Constr.mkVar (Context.Named.Declaration.get_id wit) in
-       let insert_wit h = Sigma.here wit h in
-       if Term.is_Prop sort then
-         Refine.refine ~unsafe:false { Sigma.run = insert_wit }
+       let insert_wit h = (h, EConstr.of_constr wit) in
+       if Termops.is_Prop sigma sort then
+         Refine.refine ~typecheck:true insert_wit
        else
          Tacticals.New.tclZEROMSG (str "Found a proof-relevant assumption.")
     | _ -> 
        Tacticals.New.tclZEROMSG (str "This pattern is ambiguous.")
-  end }
+  end
 
 (* Extend tactic argument's syntax with pattern  *)
 let pr_cartouche_patt _ _ _ _ = mt ()
 let interp_cartouche_patt ist gl pat = (Tacmach.project gl, pat)
 let glob_cartouche_patt ist pat =  
   let ltacsign = { ltac_vars = ist.ltacvars
-                 ; ltac_bound = Names.Id.Set.empty }
+                 ; ltac_bound = Names.Id.Set.empty
+                 ; ltac_extra = Genintern.Store.empty }
   in
   snd (intern_constr_pattern ~ltacvars:ltacsign ist.genv pat)
 let subst_cartouche_patt subst pat = Patternops.subst_pattern subst pat
@@ -84,19 +85,18 @@ let _ =
 module Gram = Pcoq.Gram
 open Pcoq.Constr
 open Constrexpr
-open Compat
 
-let register loc concl p =
+let register concl p =
   let argp = Genarg.in_gen (Genarg.rawwit wit_cartouche_patt) p in
-  let tac = Tacexpr.TacML (loc, cortouche_entry concl, [Tacexpr.TacGeneric argp]) in
-  let arg = Genarg.in_gen (Genarg.rawwit Constrarg.wit_tactic) tac in
-  CHole (loc, None, IntroAnonymous, Some arg) 
+  let tac = Tacexpr.TacML (Loc.tag (cortouche_entry concl, [Tacexpr.TacGeneric argp])) in
+  let arg = Genarg.in_gen (Genarg.rawwit Tacarg.wit_tactic) tac in
+  CHole (None, IntroAnonymous, Some arg)
 
 GEXTEND Gram
   GLOBAL: operconstr ;
 
   operconstr:
-    [ "200" [ "\\<"; p = cartouche_patt; "\\>" -> register !@loc false p
-            | "\\<<"; p = cartouche_patt; "\\>>" -> register !@loc true p ]]
+    [ "200" [ "\\<"; p = cartouche_patt; "\\>" -> CAst.make @@ register false p
+            | "\\<<"; p = cartouche_patt; "\\>>" -> CAst.make @@ register true p ]]
     ;
 END;;

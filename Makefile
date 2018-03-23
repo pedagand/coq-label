@@ -14,4 +14,7 @@ Makefile.coq: _CoqProject
 	cp .tools/merlin .merlin
 	sed -i s/COQLIB/"$(COQLIB)"/g .merlin
 
+install:
+	$(MAKE) -f Makefile.coq install
+
 .PHONY: all clean

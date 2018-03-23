@@ -83,6 +83,7 @@ simply add the following to `~/.coqrc`:
 
 + [Pierre-Évariste Dagand](https://pages.lip6.fr/Pierre-Evariste.Dagand/)
 + [Théo Zimmermann](http://www.theozimmermann.net/fr/)
++ [Pierre-Marie Pédrot](https://www.pédrot.fr/)
 
 ## License
 

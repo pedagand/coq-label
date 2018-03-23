@@ -7,10 +7,10 @@ open Pcoq.Constr
 open Pp
 open Ltac_plugin
 
-DECLARE PLUGIN "cortouche_plugin"
+DECLARE PLUGIN "label_plugin"
 
 (* Search for the pattern [patt] in the context. *)
-let cartouche ?(concl=false) patt =
+let label ?(concl=false) patt =
   Proofview.Goal.nf_enter begin fun gl ->
     let hyps = Proofview.Goal.hyps gl in
     let sigma = Tacmach.New.project gl in
@@ -41,54 +41,54 @@ let cartouche ?(concl=false) patt =
   end
 
 (* Extend tactic argument's syntax with pattern  *)
-let pr_cartouche_patt _ _ _ _ = mt ()
-let interp_cartouche_patt ist gl pat = (Tacmach.project gl, pat)
-let glob_cartouche_patt ist pat =  
+let pr_label_patt _ _ _ _ = mt ()
+let interp_label_patt ist gl pat = (Tacmach.project gl, pat)
+let glob_label_patt ist pat =
   let ltacsign = { ltac_vars = ist.ltacvars
                  ; ltac_bound = Names.Id.Set.empty
                  ; ltac_extra = Genintern.Store.empty }
   in
   snd (intern_constr_pattern ~ltacvars:ltacsign ist.genv pat)
-let subst_cartouche_patt subst pat = Patternops.subst_pattern subst pat
+let subst_label_patt subst pat = Patternops.subst_pattern subst pat
 
-ARGUMENT EXTEND cartouche_patt 
-    PRINTED BY pr_cartouche_patt 
-    INTERPRETED BY interp_cartouche_patt
-    GLOBALIZED BY glob_cartouche_patt
-    SUBSTITUTED BY subst_cartouche_patt
-    RAW_PRINTED BY pr_cartouche_patt
-    GLOB_PRINTED BY pr_cartouche_patt
+ARGUMENT EXTEND label_patt
+    PRINTED BY pr_label_patt
+    INTERPRETED BY interp_label_patt
+    GLOBALIZED BY glob_label_patt
+    SUBSTITUTED BY subst_label_patt
+    RAW_PRINTED BY pr_label_patt
+    GLOB_PRINTED BY pr_label_patt
  [ lconstr(c) ] ->  [ c ]
 END
 
-(* Manually register [cartouche] as an ML tactic *)
+(* Manually register [label] as an ML tactic *)
 
-let cortouche_name concl = 
+let label_name concl =
   let suff = if concl then "std" else "concl" in
-  { Tacexpr.mltac_tactic = Printf.sprintf "cartouche_%s" suff ;
-    Tacexpr.mltac_plugin = "cortouche_plugin" }
+  { Tacexpr.mltac_tactic = Printf.sprintf "label_%s" suff ;
+    Tacexpr.mltac_plugin = "label_plugin" }
 
-let cortouche_entry concl =
+let label_entry concl =
   { Tacexpr.mltac_index = 0;
-    Tacexpr.mltac_name = cortouche_name concl }
+    Tacexpr.mltac_name = label_name concl }
 
 let _ =
-  let cartouche concl = fun [c] _ -> 
-    cartouche ~concl:concl (Tacinterp.Value.cast (Genarg.topwit wit_cartouche_patt) c)
+  let label concl = fun [c] _ ->
+    label ~concl:concl (Tacinterp.Value.cast (Genarg.topwit wit_label_patt) c)
   in
-  Tacenv.register_ml_tactic (cortouche_name true) [| cartouche true |];
-  Tacenv.register_ml_tactic (cortouche_name false) [| cartouche false |]
+  Tacenv.register_ml_tactic (label_name true) [| label true |];
+  Tacenv.register_ml_tactic (label_name false) [| label false |]
 
 
-(* Extend grammar with cartouches. *)
+(* Extend grammar with labels. *)
 
 module Gram = Pcoq.Gram
 open Pcoq.Constr
 open Constrexpr
 
 let register concl p =
-  let argp = Genarg.in_gen (Genarg.rawwit wit_cartouche_patt) p in
-  let tac = Tacexpr.TacML (Loc.tag (cortouche_entry concl, [Tacexpr.TacGeneric argp])) in
+  let argp = Genarg.in_gen (Genarg.rawwit wit_label_patt) p in
+  let tac = Tacexpr.TacML (Loc.tag (label_entry concl, [Tacexpr.TacGeneric argp])) in
   let arg = Genarg.in_gen (Genarg.rawwit Tacarg.wit_tactic) tac in
   CHole (None, IntroAnonymous, Some arg)
 
@@ -96,7 +96,7 @@ GEXTEND Gram
   GLOBAL: operconstr ;
 
   operconstr:
-    [ "200" [ "\\<"; p = cartouche_patt; "\\>" -> CAst.make @@ register false p
-            | "\\<<"; p = cartouche_patt; "\\>>" -> CAst.make @@ register true p ]]
+    [ "200" [ "\\<"; p = label_patt; "\\>" -> CAst.make @@ register false p
+            | "\\<<"; p = label_patt; "\\>>" -> CAst.make @@ register true p ]]
     ;
 END;;

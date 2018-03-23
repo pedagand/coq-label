@@ -1,4 +1,4 @@
 -I src
--Q theories Cortouche
-./src/cortouche_plugin.ml4
+-Q theories Label
+./src/label_plugin.ml4
 ./theories/Plugin.v

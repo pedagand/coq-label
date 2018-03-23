@@ -1,4 +1,4 @@
-Require Import Cortouche.Plugin.
+Require Import Label.Plugin.
 
 Parameter typ: Type.
 Parameter exp: Type.

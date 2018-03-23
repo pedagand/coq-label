@@ -1,4 +1,4 @@
-Require Import Cortouche.Plugin.
+Require Import Label.Plugin.
 Require Import Coq.Reals.Ranalysis.
 
 Import Rdefinitions.

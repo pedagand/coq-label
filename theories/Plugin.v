@@ -1,2 +1,1 @@
-Declare ML Module "cortouche_plugin".
-
+Declare ML Module "label_plugin".

@@ -1,9 +1,9 @@
-# Cortouche: the end of H, H0, H1, ...
+# Labels: the end of H, H0, H1, ...
 
 
 ## Synopsis
 
-Cortouche is a Coq plugin for referring to propositional assumptions
+Label is a Coq plugin for referring to propositional assumptions
 without systematically resorting to tedious (or, worse, automatic)
 naming of hypothesis. To this end, we allow the user to write a
 pattern to refer to the (unique) assumption matching this pattern in
@@ -23,7 +23,7 @@ Let us consider a (propositional) predicate `is_foo` over some types
     Parameter is_foo: exp -> typ -> Prop.
 
 Wherever Coq expects an identifier referring to an assumption, we can
-provide a cortouche that will search for a type matching a given
+provide a label that will search for a type matching a given
 pattern. In the following example, we can return the desired argument
 by referring to its type:
 
@@ -47,7 +47,7 @@ other assumption matching `is_foo e1`:
     Qed.
 
 Nonetheless, if we are too general and do not mention `e1`, the
-cortouche is ambiguous and will be rejected:
+label is ambiguous and will be rejected:
 
     Lemma example_too_general: 
       forall t e1 e2 , 
@@ -58,7 +58,7 @@ cortouche is ambiguous and will be rejected:
     Abort.
 
 Finally, if we want to match the end of a type telescope, we must
-explicitly request it through a double cortouche:
+explicitly request it through a double label:
 
     Lemma example_concl: 
       (forall e t, is_foo e t) -> forall e t, is_foo e t.
@@ -76,8 +76,8 @@ You can then either `make install` the plugin or leave it in its
 current directory. To be able to import it from anywhere in Coq,
 simply add the following to `~/.coqrc`:
 
-    Add Rec LoadPath "path_to_cortouche/theories" as Cortouche.
-    Add ML Path "path_to_cortouche/src".
+    Add Rec LoadPath "path_to_label/theories" as Label.
+    Add ML Path "path_to_label/src".
 
 ## Contributors
 

@@ -1,4 +1,5 @@
 -I src
 -Q theories Label
+-Q src Label
 ./src/label_plugin.ml4
 ./theories/Plugin.v

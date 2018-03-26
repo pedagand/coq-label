@@ -69,6 +69,19 @@ explicitly request it through a double label:
 
 ## Installation
 
+### Using `opam`
+
+Install the library (available in
+the [Coq opam repository](http://coq.io/opam/)):
+
+    opam install coq-label
+
+Then, to load the library in a Coq script:
+
+    Require Import Label.Plugin.
+
+### Manual setup
+
 Assuming that you have a working installation of Coq.trunk, do `make`.
 This will consecutively build the plugin and the supporting theories.
 

@@ -27,8 +27,8 @@ provide a label that will search for a type matching a given
 pattern. In the following example, we can return the desired argument
 by referring to its type:
 
-    Lemma example: 
-      forall t e1 e2 , 
+    Lemma example:
+      forall t e1 e2 ,
         is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
     Proof.
       intros.
@@ -38,8 +38,8 @@ by referring to its type:
 In fact, our pattern could have been more general since there is no
 other assumption matching `is_foo e1`:
 
-    Lemma example_patt: 
-      forall t e1 e2 , 
+    Lemma example_patt:
+      forall t e1 e2 ,
         is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
     Proof.
       intros.
@@ -49,8 +49,8 @@ other assumption matching `is_foo e1`:
 Nonetheless, if we are too general and do not mention `e1`, the
 label is ambiguous and will be rejected:
 
-    Lemma example_too_general: 
-      forall t e1 e2 , 
+    Lemma example_too_general:
+      forall t e1 e2 ,
         is_foo e1 t -> is_foo e2 t -> is_foo e1 t.
     Proof.
       intros.
@@ -60,7 +60,7 @@ label is ambiguous and will be rejected:
 Finally, if we want to match the end of a type telescope, we must
 explicitly request it through a double label:
 
-    Lemma example_concl: 
+    Lemma example_concl:
       (forall e t, is_foo e t) -> forall e t, is_foo e t.
     Proof.
       intros.

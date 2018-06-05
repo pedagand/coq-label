@@ -22,7 +22,7 @@ let label ?(concl=false) patt =
       Printf.ifprintf stderr "Checking pattern %s against conclusion %s\n"
                       (Pp.string_of_ppcmds (Printer.pr_constr_pattern_env env sigma patt))
                       (Pp.string_of_ppcmds (Printer.pr_econstr_env env sigma typ));
-      Constr_matching.is_matching_conv env sigma patt typ
+      Constr_matching.is_matching env sigma patt typ
     in
     let wit = List.find_all is_matching_patt hyps in
     match wit with
@@ -48,7 +48,7 @@ let glob_label_patt ist pat =
                  ; ltac_bound = Names.Id.Set.empty
                  ; ltac_extra = Genintern.Store.empty }
   in
-  snd (intern_constr_pattern ~ltacvars:ltacsign ist.genv pat)
+  snd (intern_constr_pattern ~ltacvars:ltacsign ist.genv (Evd.from_env ist.genv) pat)
 let subst_label_patt subst pat = Patternops.subst_pattern subst pat
 
 ARGUMENT EXTEND label_patt
